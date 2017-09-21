@@ -22,5 +22,9 @@
   "bugs": {
     "url": "https://github.com/rglyons/beaker-visualization/issues"
   },
-  "homepage": "https://github.com/rglyons/beaker-visualization#readme"
+  "homepage": "https://github.com/rglyons/beaker-visualization#readme",
+  "dependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^3.5.3"
+  }
 }
