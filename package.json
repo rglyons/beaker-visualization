@@ -1,0 +1,26 @@
+{
+  "name": "beaker-visualization",
+  "version": "1.0.0",
+  "description": "A web app for visualizing system and test data managed by the Beaker test framework",
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rglyons/beaker-visualization.git"
+  },
+  "keywords": [
+    "npm"
+  ],
+  "author": "Robert Lyons",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rglyons/beaker-visualization/issues"
+  },
+  "homepage": "https://github.com/rglyons/beaker-visualization#readme"
+}
