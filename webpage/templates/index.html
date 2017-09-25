@@ -1,0 +1,134 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Beaker Data Visualization</title>
+  <meta name="description" content="A portal for diplaying the status/data of the systems in the lab being managed by Beaker">
+  <meta name="author" content="Robert Lyons">
+  <script src="https://unpkg.com/vue"></script>
+  <script src="/webpage/js/jquery.min.js"></script>
+  <script type="text/javascript">
+    const host = 'http://10.76.144.103:3000'
+  </script>
+</head>
+
+<body>
+
+  <div id="app">
+    <h1>Lab Status</h1>
+    <br>
+    <h3>Mustang - {{ mustang.all.length }} systems</h3>
+    <p>
+      Automated - {{ mustang.automated.length }}&nbsp;&nbsp;
+      Broken - {{ mustang.broken.length }}&nbsp;&nbsp;
+      Manual - {{ mustang.manual.length }}
+    </p>
+    <button v-on:click="toggle('mustang')">
+      {{(showList.mustang) ? 'Hide': 'Show'}} Mustang systems
+    </button>
+    <template v-if="showList.mustang">
+      <ul id="mustang-list">
+        <li v-for="item in mustang.all">
+          {{ item.fqdn }}: {{ item.status }}
+        </li>
+      </ul>
+    </template>
+    <br>
+    <h3>Merlin - {{ merlin.all.length }} systems</h3>
+    <p>
+      Automated - {{ merlin.automated.length }}&nbsp;&nbsp;
+      Broken - {{ merlin.broken.length }}&nbsp;&nbsp;
+      Manual - {{ merlin.manual.length }}
+    </p>
+    <button v-on:click="toggle('merlin')">
+      {{(showList.merlin) ? 'Hide': 'Show'}} Merlin systems
+    </button>
+    <template v-if="showList.merlin">
+      <ul id="merlin-list">
+        <li v-for="item in merlin.all">
+          {{ item.fqdn }}: {{ item.status }}
+        </li>
+      </ul>
+    </template>
+    <br>
+    <h3>Osprey - {{ osprey.all.length }} systems</h3>
+    <p>
+      Automated - {{ osprey.automated.length }}&nbsp;&nbsp;
+      Broken - {{ osprey.broken.length }}&nbsp;&nbsp;
+      Manual - {{ osprey.manual.length }}
+    </p>
+    <button v-on:click="toggle('osprey')">
+      {{(showList.osprey) ? 'Hide': 'Show'}} Osprey systems
+    </button>
+    <template v-if="showList.osprey">
+      <ul id="osprey-list">
+        <li v-for="item in osprey.all">
+          {{ item.fqdn }}: {{ item.status }}
+        </li>
+      </ul>
+    </template>
+  </div>
+
+
+
+  <script  type="text/javascript">
+    var errorLabStatus = function (err) {
+      vm.message = err
+    }
+
+    var initLabStatus = function (data) {
+      vm.mustang = data.mustang
+      vm.merlin = data.merlin
+      vm.osprey = data.osprey
+    }
+
+    $(document).ready(function() {
+      $.ajax({
+          type: 'GET',
+          url: host + '/api/query/lab_status',
+          headers: {
+            'Access-Control-Allow-Origin' : '*'
+          },
+          success:  initLabStatus,
+          error: errorLabStatus
+        })
+    });
+
+    var vm = new Vue({
+      el: '#app',
+      data: {
+        mustang: { all: [] },
+        merlin: { all: [] },
+        osprey: { all: [] },
+        showList: {
+          mustang: false,
+          merlin: false,
+          osprey:false
+        }
+      },
+      methods: {
+        toggle: function(param) {
+          switch (param) {
+            case 'mustang':
+              this.showList.mustang = !this.showList.mustang;
+              break;
+            case 'merlin':
+              this.showList.merlin = !this.showList.merlin;
+              break;
+            case 'osprey':
+              this.showList.osprey = !this.showList.osprey;
+              break;
+            default: break;
+          }
+        },
+      }
+    })
+
+
+
+
+  </script>
+</body>
+</html>
