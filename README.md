@@ -1,6 +1,5 @@
 # Beaker Visualization Tool
 
-----
 ## Who made it? What's it for?
 This web tool was created by Robert Lyons at Applied Micro Circuits. It is intended to present and visualize lab data collected by the Beaker automation framework for at-a-glance information and problem diagnosis.
 
