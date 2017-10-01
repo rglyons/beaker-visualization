@@ -7,9 +7,11 @@ function resolve (dir) {
   return path.join(__dirname, '..', dir)
 }
 
+console.log(process.cwd())
+console.log(path.resolve(__dirname, '../../webpage/src/main.js'))
 module.exports = {
   entry: {
-    app: './webpage/src/main.js'
+    app: path.resolve(__dirname, '../../webpage/src/main.js')
   },
   output: {
     path: config.build.assetsRoot,
