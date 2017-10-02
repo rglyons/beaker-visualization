@@ -9,58 +9,63 @@
     </bar-chart>
   </div>
   <br>
-  <div>
+  <!-- mustang board data -->
+  <div class="detail-list">
     <h3>Mustang - {{ mustang.all.length }} systems</h3>
-    <p>
-      Automated - {{ mustang.automated.length }}&nbsp;&nbsp;
-      Broken - {{ mustang.broken.length }}&nbsp;&nbsp;
-      Manual - {{ mustang.manual.length }}
-    </p>
-    <button v-on:click="toggle('mustang')">
-      {{(showList.mustang) ? 'Hide': 'Show'}} Mustang systems
-    </button>
-    <template v-if="showList.mustang">
-      <ul id="mustang-list">
-        <li v-for="item in mustang.all">
-          {{ item.fqdn }}: {{ item.status }}
-        </li>
-      </ul>
-    </template>
-    <br>
-    <h3>Merlin - {{ merlin.all.length }} systems</h3>
-    <p>
-      Automated - {{ merlin.automated.length }}&nbsp;&nbsp;
-      Broken - {{ merlin.broken.length }}&nbsp;&nbsp;
-      Manual - {{ merlin.manual.length }}
-    </p>
-    <button v-on:click="toggle('merlin')">
-      {{(showList.merlin) ? 'Hide': 'Show'}} Merlin systems
-    </button>
-    <template v-if="showList.merlin">
-      <ul id="merlin-list">
-        <li v-for="item in merlin.all">
-          {{ item.fqdn }}: {{ item.status }}
-        </li>
-      </ul>
-    </template>
-    <br>
-    <h3>Osprey - {{ osprey.all.length }} systems</h3>
-    <p>
-      Automated - {{ osprey.automated.length }}&nbsp;&nbsp;
-      Broken - {{ osprey.broken.length }}&nbsp;&nbsp;
-      Manual - {{ osprey.manual.length }}
-    </p>
-    <button v-on:click="toggle('osprey')">
-      {{(showList.osprey) ? 'Hide': 'Show'}} Osprey systems
-    </button>
-    <template v-if="showList.osprey">
-      <ul id="osprey-list">
-        <li v-for="item in osprey.all">
-          {{ item.fqdn }}: {{ item.status }}
-        </li>
-      </ul>
-    </template>
+    <v-expansion-panel>
+      <v-expansion-panel-content v-for="(item,i) in mustang" :key="i">
+        <template v-if="i != 'all'">
+          <div slot="header">{{i[0].toUpperCase() + i.slice(1)}} - {{ item.length }}</div>
+          <v-card>
+            <ul id="mustang-list" class="grey lighten-3">
+              <li v-for="board in item">
+                {{ board.fqdn }}
+              </li>
+            </ul>
+          </v-card>
+        </template>
+      </v-expansion-panel-content>
+    </v-expansion-panel>
   </div>
+  <!-- merlin board data -->
+  <br>
+  <div class="detail-list">
+    <h3>Merlin - {{ merlin.all.length }} systems</h3>
+    <v-expansion-panel>
+      <v-expansion-panel-content v-for="(item,i) in merlin" :key="i">
+        <template v-if="i != 'all'">
+          <div slot="header">{{i[0].toUpperCase() + i.slice(1)}} - {{ item.length }}</div>
+          <v-card>
+            <ul id="merlin-list" class="grey lighten-3">
+              <li v-for="board in item">
+                {{ board.fqdn }}
+              </li>
+            </ul>
+          </v-card>
+        </template>
+      </v-expansion-panel-content>
+    </v-expansion-panel>
+  </div>
+  <!-- osprey board data -->
+  <br>
+  <div class="detail-list">
+    <h3>Osprey - {{ osprey.all.length }} systems</h3>
+    <v-expansion-panel>
+      <v-expansion-panel-content v-for="(item,i) in osprey" :key="i">
+        <template v-if="i != 'all'">
+          <div slot="header">{{i[0].toUpperCase() + i.slice(1)}} - {{ item.length }}</div>
+          <v-card>
+            <ul id="osprey-list" class="grey lighten-3">
+              <li v-for="board in item">
+                {{ board.fqdn }}
+              </li>
+            </ul>
+          </v-card>
+        </template>
+      </v-expansion-panel-content>
+    </v-expansion-panel>
+  </div>
+
 </div>
 </template>
 
@@ -168,22 +173,7 @@ export default {
       }
     }
   },
-  methods: {
-    toggle: function(param) {
-      switch (param) {
-        case 'mustang':
-          this.showList.mustang = !this.showList.mustang;
-          break;
-        case 'merlin':
-          this.showList.merlin = !this.showList.merlin;
-          break;
-        case 'osprey':
-          this.showList.osprey = !this.showList.osprey;
-          break;
-        default: break;
-      }
-    }
-  },
+  methods: {},
   created: function() {
     axios.get(this.host + '/api/query/lab_status')
     .then((res) => {
@@ -201,8 +191,17 @@ export default {
 </script>
 
 <style lang="sass" scoped>
-
 ul
   list-style-type: none
+
+.detail-list
+  width: 75%
+  padding: 10px
+  margin: auto
+
+#barChart1
+  margin: auto
+  width: 90%
+  padding: 10px
 
 </style>
