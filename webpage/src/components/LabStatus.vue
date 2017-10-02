@@ -90,9 +90,29 @@ export default {
         maintainAspectRatio: false,
         scales: {
           xAxes: [{
-            categorySpacing: 0
+            gridLines: {
+              display: true
+            },
+            scaleLabel: {
+              display: true,
+              labelString: 'System Type',
+              fontSize: 18,
+              fontStyle: 'bold'
+            },
+            categoryPercentage: 0.75,
+            barPercentage: 0.65
           }],
           yAxes: [{
+            gridLines: {
+              display: true
+            },
+            scaleLabel: {
+              display: true,
+              labelString: 'Number of Systems',
+              fontSize: 18,
+              fontStyle: 'bold',
+              padding: 6
+            },
             ticks: {
               stepSize: 25
             }
@@ -110,29 +130,38 @@ export default {
         datasets: [
           {
             label: 'Automated',
-            backgroundColor: '#27ae60',
+            borderColor: '#26A65B',
+            borderWidth: '1',
+            backgroundColor: 'rgba(38, 166, 91, 0.35)',
             data: [
-              this.mustang.automated.length,
-              this.merlin.automated.length,
-              this.osprey.automated.length
+              // this.mustang.automated.length,
+              // this.merlin.automated.length,
+              // this.osprey.automated.length
+              220, 8, 50
             ]
           },
           {
             label: 'Broken',
-            backgroundColor: '#c0392b',
+            borderColor: '#F62459',
+            borderWidth: '1',
+            backgroundColor: 'rgba(246, 30, 150, 0.35)',
             data: [
-              this.mustang.broken.length,
-              this.merlin.broken.length,
-              this.osprey.broken.length
+              // this.mustang.broken.length,
+              // this.merlin.broken.length,
+              // this.osprey.broken.length
+              75, 8, 23
             ]
           },
           {
             label: 'Manual',
-            backgroundColor: '#3498db',
+            borderColor: '#FFA400',
+            borderWidth: '1',
+            backgroundColor: 'rgba(255, 100, 0, 0.35)',
             data: [
-              this.mustang.manual.length,
-              this.merlin.manual.length,
-              this.osprey.manual.length
+              // this.mustang.manual.length,
+              // this.merlin.manual.length,
+              // this.osprey.manual.length
+              8, 7, 3
             ]
           },
         ]
