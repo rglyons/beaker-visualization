@@ -144,10 +144,10 @@ export default {
             borderWidth: '1',
             backgroundColor: 'rgba(38, 166, 91, 0.35)',
             data: [
-              // this.mustang.automated.length,
-              // this.merlin.automated.length,
-              // this.osprey.automated.length
-              220, 8, 50
+              this.mustang.automated.length,
+              this.merlin.automated.length,
+              this.osprey.automated.length
+              // 220, 8, 50
             ]
           },
           {
@@ -156,10 +156,10 @@ export default {
             borderWidth: '1',
             backgroundColor: 'rgba(246, 30, 150, 0.35)',
             data: [
-              // this.mustang.broken.length,
-              // this.merlin.broken.length,
-              // this.osprey.broken.length
-              75, 8, 23
+              this.mustang.broken.length,
+              this.merlin.broken.length,
+              this.osprey.broken.length
+              // 75, 8, 23
             ]
           },
           {
@@ -168,10 +168,10 @@ export default {
             borderWidth: '1',
             backgroundColor: 'rgba(255, 100, 0, 0.35)',
             data: [
-              // this.mustang.manual.length,
-              // this.merlin.manual.length,
-              // this.osprey.manual.length
-              8, 7, 3
+              this.mustang.manual.length,
+              this.merlin.manual.length,
+              this.osprey.manual.length
+              // 8, 7, 3
             ]
           },
         ]
