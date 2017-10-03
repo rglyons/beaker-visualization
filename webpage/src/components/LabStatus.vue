@@ -9,61 +9,66 @@
     </bar-chart>
   </div>
   <br>
-  <!-- mustang board data -->
-  <div class="detail-list">
-    <h3>Mustang - {{ mustang.all.length }} systems</h3>
-    <v-expansion-panel>
-      <v-expansion-panel-content v-for="(item,i) in mustang" :key="i">
-        <template v-if="i != 'all'">
-          <div slot="header">{{i[0].toUpperCase() + i.slice(1)}} - {{ item.length }}</div>
-          <v-card>
-            <ul id="mustang-list" class="grey lighten-3">
-              <li v-for="board in item">
-                {{ board.fqdn }}
-              </li>
-            </ul>
-          </v-card>
-        </template>
-      </v-expansion-panel-content>
-    </v-expansion-panel>
-  </div>
-  <!-- merlin board data -->
-  <br>
-  <div class="detail-list">
-    <h3>Merlin - {{ merlin.all.length }} systems</h3>
-    <v-expansion-panel>
-      <v-expansion-panel-content v-for="(item,i) in merlin" :key="i">
-        <template v-if="i != 'all'">
-          <div slot="header">{{i[0].toUpperCase() + i.slice(1)}} - {{ item.length }}</div>
-          <v-card>
-            <ul id="merlin-list" class="grey lighten-3">
-              <li v-for="board in item">
-                {{ board.fqdn }}
-              </li>
-            </ul>
-          </v-card>
-        </template>
-      </v-expansion-panel-content>
-    </v-expansion-panel>
-  </div>
-  <!-- osprey board data -->
-  <br>
-  <div class="detail-list">
-    <h3>Osprey - {{ osprey.all.length }} systems</h3>
-    <v-expansion-panel>
-      <v-expansion-panel-content v-for="(item,i) in osprey" :key="i">
-        <template v-if="i != 'all'">
-          <div slot="header">{{i[0].toUpperCase() + i.slice(1)}} - {{ item.length }}</div>
-          <v-card>
-            <ul id="osprey-list" class="grey lighten-3">
-              <li v-for="board in item">
-                {{ board.fqdn }}
-              </li>
-            </ul>
-          </v-card>
-        </template>
-      </v-expansion-panel-content>
-    </v-expansion-panel>
+  <!-- board data -->
+  <div style="width: 90%; display: table; margin:auto">
+    <div style="display: table-row">
+      <!-- mustang board data -->
+      <div class="detail-list">
+        <h3>Mustang - {{ mustang.all.length }} systems</h3>
+        <v-expansion-panel>
+          <v-expansion-panel-content v-for="(item,i) in mustang" :key="i">
+            <template v-if="i != 'all'">
+              <div slot="header">{{i[0].toUpperCase() + i.slice(1)}} - {{ item.length }}</div>
+              <v-card>
+                <ul id="mustang-list" class="grey lighten-3">
+                  <li v-for="board in item">
+                    {{ board.fqdn }}
+                  </li>
+                </ul>
+              </v-card>
+            </template>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </div>
+      <!-- merlin board data -->
+      <br>
+      <div class="detail-list">
+        <h3>Merlin - {{ merlin.all.length }} systems</h3>
+        <v-expansion-panel>
+          <v-expansion-panel-content v-for="(item,i) in merlin" :key="i">
+            <template v-if="i != 'all'">
+              <div slot="header">{{i[0].toUpperCase() + i.slice(1)}} - {{ item.length }}</div>
+              <v-card>
+                <ul id="merlin-list" class="grey lighten-3">
+                  <li v-for="board in item">
+                    {{ board.fqdn }}
+                  </li>
+                </ul>
+              </v-card>
+            </template>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </div>
+      <!-- osprey board data -->
+      <br>
+      <div class="detail-list">
+        <h3>Osprey - {{ osprey.all.length }} systems</h3>
+        <v-expansion-panel>
+          <v-expansion-panel-content v-for="(item,i) in osprey" :key="i">
+            <template v-if="i != 'all'">
+              <div slot="header">{{i[0].toUpperCase() + i.slice(1)}} - {{ item.length }}</div>
+              <v-card>
+                <ul id="osprey-list" class="grey lighten-3">
+                  <li v-for="board in item">
+                    {{ board.fqdn }}
+                  </li>
+                </ul>
+              </v-card>
+            </template>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -116,7 +121,7 @@ export default {
               labelString: 'Number of Systems',
               fontSize: 18,
               fontStyle: 'bold',
-              padding: 6
+              padding: 30
             },
             ticks: {
               stepSize: 25
@@ -195,9 +200,13 @@ ul
   list-style-type: none
 
 .detail-list
-  width: 75%
+  width: 33%
   padding: 10px
-  margin: auto
+  display: table-cell
+
+.detail-list h3
+  font-size: 35px
+  font-size: 2.0vw
 
 #barChart1
   margin: auto

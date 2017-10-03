@@ -5,7 +5,6 @@
       persistent
       v-model="drawer"
       light
-      enable-resize-watcher
       absolute
     >
       <v-list dense>
