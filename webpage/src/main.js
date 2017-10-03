@@ -3,6 +3,7 @@
 import '../../node_modules/vuetify/dist/vuetify.min.css'
 import '../static/css/material_icon.css'
 import '../static/js/jquery.min.js'
+import '../static/js/ResizeSensor.js'
 
 import Vue from 'vue'
 import App from './App'

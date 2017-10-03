@@ -1,7 +1,7 @@
 <template>
 <div id="labstatus">
   <!-- add in a graph component -->
-  <div id="barChart1">
+  <div id="barChart1" ref="barChart1">
     <bar-chart
       :chart-data="barChart1_data"
       :options="barChart1_options"
@@ -180,6 +180,7 @@ export default {
   },
   methods: {},
   created: function() {
+    // execute query
     axios.get(this.host + '/api/query/lab_status')
     .then((res) => {
       //console.log(res)
@@ -190,6 +191,14 @@ export default {
     .catch((err) => {
       this.message = err
       console.log(err)
+    })
+  },
+  mounted: function() {
+    // add listener to resize chart when parent div resizes
+    console.log(this.$refs.barChart1)
+    new ResizeSensor(this.$refs.barChart1, function() {
+      //console.log('resizing chart container')
+      //$scope.$emit('$resize')
     })
   }
 }
