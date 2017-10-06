@@ -1,7 +1,9 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+
 import Home from '../components/Home'
 import LabStatus from '../components/LabStatus'
+import TestHistory from '../components/TestHistory'
 
 import store from '../store'
 
@@ -21,7 +23,13 @@ const router = new Router({
     {
       path: '/lab_status',
       name: 'Lab Status',
+      props: true,
       component: LabStatus
+    },
+    {
+      path: '/test_history',
+      name: 'Test History',
+      component: TestHistory
     }
   ]
 })

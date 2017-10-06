@@ -8,10 +8,11 @@
     "test": "test"
   },
   "scripts": {
-    "prod": "NODE_ENV=production nodemon ./app.js",
+    "prod": "NODE_ENV=production node ./app.js",
     "dev": "NODE_ENV=development nodemon ./app.js",
     "build": "node webpage/build/build.js",
-    "devv": "node webpage/build/dev-server.js"
+    "devv": "node webpage/build/dev-server.js",
+    "all": "npm run dev & npm run devv"
   },
   "repository": {
     "type": "git",

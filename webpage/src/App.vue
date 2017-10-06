@@ -45,6 +45,8 @@
 
 <script>
 import {mapState} from 'vuex'
+import axios from 'axios'
+import store from './store'
 
 export default {
   name: 'App',
@@ -61,14 +63,39 @@ export default {
           title: 'Lab Status',
           icon: 'laptop',
           path: '/lab_status'
+        },
+        {
+          title: 'Test History',
+          icon: 'assessment',
+          path: '/test_history'
         }
       ]
     }
   },
   computed: {
     ...mapState([
-      'activePage'
+      'activePage',
+      'host'
     ]),
+  },
+  created: function() {
+    // execute query
+    axios.get(this.host + '/api/query/lab_status')
+    .then((res) => {
+      var labData = {
+        mustang: res.data.mustang,
+        merlin: res.data.merlin,
+        osprey: res.data.osprey,
+        distros: res.data.distros
+      }
+      // update state manager
+      store.commit('updateLabData', labData)
+      store.commit('setQuerying', false)
+    })
+    .catch((err) => {
+      this.message = err
+      console.log(err)
+    })
   }
 }
 </script>

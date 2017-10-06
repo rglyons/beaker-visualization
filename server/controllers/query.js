@@ -4,7 +4,7 @@ const mysql = require('mysql');
 function initConnectionPool() {
   console.log("Creating new connection pool instance...");
   var pool  = mysql.createPool({
-    connectionLimit : 3,
+    connectionLimit : 4,
     host: '10.76.144.103',
     user: 'root',
     password: 'amcc1234',
@@ -67,9 +67,11 @@ module.exports = {
   getLabStatus(req, res) {
     var pool = initConnectionPool()
     var promises = [
-      execAsyncQuery(pool, 'SELECT fqdn, status FROM system WHERE status!=\'Removed\' AND fqdn LIKE \'mustang%\''),
-      execAsyncQuery(pool, 'SELECT fqdn, status FROM system WHERE status!=\'Removed\' AND fqdn LIKE \'merlin%\''),
-      execAsyncQuery(pool, 'SELECT fqdn, status FROM system WHERE status!=\'Removed\' AND fqdn LIKE \'osprey%\'')
+      execAsyncQuery(pool, 'SELECT fqdn, status FROM system WHERE fqdn LIKE \'mustang%\''),
+      execAsyncQuery(pool, 'SELECT fqdn, status FROM system WHERE fqdn LIKE \'merlin%\''),
+      execAsyncQuery(pool, 'SELECT fqdn, status FROM system WHERE fqdn LIKE \'osprey%\''),
+      execAsyncQuery(pool,
+        'SELECT d1.id, d2.name FROM distro_tree d1, distro d2 WHERE d1.distro_id=d2.id' )
     ]
     return Promise.all(promises)
       .then(queryData => {
@@ -85,6 +87,9 @@ module.exports = {
           manual: queryData[0].filter(function(sys){
             return sys.status == 'Manual'
           }),
+          removed: queryData[0].filter(function(sys){
+            return sys.status == 'Removed'
+          }),
         };
         var merlin = {
           all: queryData[1],
@@ -96,6 +101,9 @@ module.exports = {
           }),
           manual: queryData[1].filter(function(sys){
             return sys.status == 'Manual'
+          }),
+          removed: queryData[1].filter(function(sys){
+            return sys.status == 'Removed'
           }),
         };
         var osprey = {
@@ -109,12 +117,20 @@ module.exports = {
           manual: queryData[2].filter(function(sys){
             return sys.status == 'Manual'
           }),
+          removed: queryData[2].filter(function(sys){
+            return sys.status == 'Removed'
+          }),
         };
         result = {
           mustang: mustang,
           merlin: merlin,
-          osprey: osprey
+          osprey: osprey,
+          distros: queryData[3]
         }
+        // allow CORS for speedy development
+        res.set({
+          "Access-Control-Allow-Origin": "http://10.76.144.103:8080"
+        })
         return res.status(200).send(result)
       })
       .catch(error => {

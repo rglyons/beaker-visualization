@@ -1,5 +1,11 @@
 <template>
 <div id="labstatus">
+  <!-- display spinner while waiting for query results -->
+  <v-progress-linear
+    id="querySpinner"
+    v-bind:indeterminate="true"
+    v-if="querying_labStatus">
+  </v-progress-linear>
   <!-- add in a graph component -->
   <div id="barChart1" ref="barChart1">
     <bar-chart
@@ -14,10 +20,10 @@
     <div style="display: table-row">
       <!-- mustang board data -->
       <div class="detail-list">
-        <h3>Mustang - {{ mustang.all.length }} systems</h3>
+        <h3>Mustang - {{ numMustang }} systems</h3>
         <v-expansion-panel>
-          <v-expansion-panel-content v-for="(item,i) in mustang" :key="i">
-            <template v-if="i != 'all'">
+          <v-expansion-panel-content v-for="(item,i) in labData.mustang" :key="i">
+            <template v-if="i != 'all' && i != 'removed'">
               <div slot="header">{{i[0].toUpperCase() + i.slice(1)}} - {{ item.length }}</div>
               <v-card>
                 <ul id="mustang-list" class="grey lighten-3">
@@ -33,10 +39,10 @@
       <!-- merlin board data -->
       <br>
       <div class="detail-list">
-        <h3>Merlin - {{ merlin.all.length }} systems</h3>
+        <h3>Merlin - {{ numMerlin }} systems</h3>
         <v-expansion-panel>
-          <v-expansion-panel-content v-for="(item,i) in merlin" :key="i">
-            <template v-if="i != 'all'">
+          <v-expansion-panel-content v-for="(item,i) in labData.merlin" :key="i">
+            <template v-if="i != 'all' && i != 'removed'">
               <div slot="header">{{i[0].toUpperCase() + i.slice(1)}} - {{ item.length }}</div>
               <v-card>
                 <ul id="merlin-list" class="grey lighten-3">
@@ -52,10 +58,10 @@
       <!-- osprey board data -->
       <br>
       <div class="detail-list">
-        <h3>Osprey - {{ osprey.all.length }} systems</h3>
+        <h3>Osprey - {{ numOsprey }} systems</h3>
         <v-expansion-panel>
-          <v-expansion-panel-content v-for="(item,i) in osprey" :key="i">
-            <template v-if="i != 'all'">
+          <v-expansion-panel-content v-for="(item,i) in labData.osprey" :key="i">
+            <template v-if="i != 'all' && i != 'removed'">
               <div slot="header">{{i[0].toUpperCase() + i.slice(1)}} - {{ item.length }}</div>
               <v-card>
                 <ul id="osprey-list" class="grey lighten-3">
@@ -75,7 +81,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import {mapState} from 'vuex'
 import BarChart from './BarChart'
 
 export default {
@@ -85,16 +91,6 @@ export default {
   },
   data: function () {
     return {
-      message: '',
-      host: 'http://10.76.144.103:3000',
-      mustang: { all: [], automated: [], broken: [], manual: [] },
-      merlin: { all: [], automated: [], broken: [], manual: [] },
-      osprey: { all: [], automated: [], broken: [], manual: [] },
-      showList: {
-        mustang: false,
-        merlin: false,
-        osprey:false
-      },
       barChart1_options: {
         responsive: true,
         maintainAspectRatio: false,
@@ -132,9 +128,21 @@ export default {
     }
   },
   computed: {
+    ...mapState([
+      'querying_labStatus',
+      'labData'
+    ]),
+    numMustang: function() {
+      return this.labData.mustang.all.length - this.labData.mustang.removed.length
+    },
+    numMerlin: function() {
+      return this.labData.merlin.all.length - this.labData.merlin.removed.length
+    },
+    numOsprey: function() {
+      return this.labData.osprey.all.length - this.labData.osprey.removed.length
+    },
     // datasets for barChart 1
     barChart1_data: function() {
-      console.log('computing barChart1 data')
       return {
         labels: ['Mustang', 'Merlin', 'Osprey'],
         datasets: [
@@ -144,9 +152,9 @@ export default {
             borderWidth: '1',
             backgroundColor: 'rgba(38, 166, 91, 0.35)',
             data: [
-              this.mustang.automated.length,
-              this.merlin.automated.length,
-              this.osprey.automated.length
+              this.labData.mustang.automated.length,
+              this.labData.merlin.automated.length,
+              this.labData.osprey.automated.length
               // 220, 8, 50
             ]
           },
@@ -156,9 +164,9 @@ export default {
             borderWidth: '1',
             backgroundColor: 'rgba(246, 30, 150, 0.35)',
             data: [
-              this.mustang.broken.length,
-              this.merlin.broken.length,
-              this.osprey.broken.length
+              this.labData.mustang.broken.length,
+              this.labData.merlin.broken.length,
+              this.labData.osprey.broken.length
               // 75, 8, 23
             ]
           },
@@ -168,9 +176,9 @@ export default {
             borderWidth: '1',
             backgroundColor: 'rgba(255, 100, 0, 0.35)',
             data: [
-              this.mustang.manual.length,
-              this.merlin.manual.length,
-              this.osprey.manual.length
+              this.labData.mustang.manual.length,
+              this.labData.merlin.manual.length,
+              this.labData.osprey.manual.length
               // 8, 7, 3
             ]
           },
@@ -178,24 +186,8 @@ export default {
       }
     }
   },
-  methods: {},
-  created: function() {
-    // execute query
-    axios.get(this.host + '/api/query/lab_status')
-    .then((res) => {
-      //console.log(res)
-      this.mustang = res.data.mustang
-      this.merlin = res.data.merlin
-      this.osprey = res.data.osprey
-    })
-    .catch((err) => {
-      this.message = err
-      console.log(err)
-    })
-  },
   mounted: function() {
     // add listener to resize chart when parent div resizes
-    console.log(this.$refs.barChart1)
     new ResizeSensor(this.$refs.barChart1, function() {
       //console.log('resizing chart container')
       //$scope.$emit('$resize')
@@ -207,6 +199,11 @@ export default {
 <style lang="sass" scoped>
 ul
   list-style-type: none
+
+#querySpinner
+  margin: auto
+  width: 90%
+  padding: 10px
 
 .detail-list
   width: 33%
