@@ -127,6 +127,7 @@
                   v-model="eDistro"
                   label="Operating Systems"
                   item-value="name"
+                  :rules="[validate]"
                 >
                   <!-- custom chip for keeping the removal 'X' in view -->
                   <template slot="selection" scope="data">
@@ -171,7 +172,7 @@
           ></v-select>
           <v-btn
             fab dark primary
-            v-tooltip:left="{ html: 'Edit Fields' }"
+            v-tooltip:left="{ html: 'Edit Display Filter' }"
             style="float: right"
             @click.native.stop="tableConfigDialog = true"
             >
@@ -180,8 +181,9 @@
         </div>
         <v-data-table
           v-bind:headers="queryRes.headers"
-          :items="queryRes.items"
+          :items="queryRes.data[etableFilter]"
           hide-actions
+          :no-data-text="'No Data Available!'"
           v-bind:pagination.sync="pagination"
           class="elevation-1"
           style="padding: 20px"
@@ -268,21 +270,24 @@ export default {
       executingQuery: false,
       tableConfigDialog: false,
       cfgSnackbar: false,
-      eMustang: null,
-      eMerlin: null,
-      eOsprey: null,
-      eDistro: null,
+      eMustang: [],
+      eMerlin: [],
+      eOsprey: [],
+      eDistro: [],
       etableFilter: null,
       pagination: { sortBy: 'Operating System' },
-      showHeaders: (localStorage.showHeaders) ? localStorage.showHeaders :
+      showHeaders: (localStorage.showHeaders) ? localStorage.showHeaders.split(',') :
       [
         'Operating System',
         'Status Completed (ct)',
         'Result Pass (ct)',
-        'Result Fail (ct)'
+        'Result Fail (ct)',
+        'Result Pass (%)',
+        'Result Fail (%)'
       ],
       queriedBoards: [],
       queryRes: {
+        data: {},
         headers: [
           { text: 'Operating System', value: 'Operating System' },
           // statuses
@@ -313,35 +318,6 @@ export default {
           { text: 'Result Panic (%)', value: 'Result Panic (%)' },
           { text: 'Result None (%)', value: 'Result None (%)' },
           { text: 'Result Skip (%)', value: 'Result Skip (%)' }
-        ],
-        items: [
-          {
-            'Operating System': 'CentOS Linux 7.3',
-            'Status New (ct)': '1',
-            'Status Processed (ct)': '1',
-            'Status Queued (ct)': '1',
-            'Status Scheduled (ct)': '1',
-            'Status Waiting (ct)': '1',
-            'Status Running (ct)': '1',
-            'Status Reserved (ct)': '1',
-            'Status Completed (ct)': '1',
-            'Status Cancelled (ct)': '1',
-            'Status Aborted (ct)': '1',
-            'Result New (ct)': '1',
-            'Result Pass (ct)': '1',
-            'Result Warn (ct)': '1',
-            'Result Fail (ct)': '1',
-            'Result Panic (ct)': '1',
-            'Result None (ct)': '1',
-            'Result Skip (ct)': '1',
-            'Result New (%)': '1%',
-            'Result Pass (%)': '1%',
-            'Result Warn (%)': '1%',
-            'Result Fail (%)': '1%',
-            'Result Panic (%)': '1%',
-            'Result None (%)': '1%',
-            'Result Skip (%)': '1%',
-          }
         ]
       }
     }
@@ -349,7 +325,8 @@ export default {
   computed: {
     ...mapState([
       'querying_labStatus',
-      'labData'
+      'labData',
+      'host'
     ]),
     labDataFlat: function () {
       var mustang = this.labData.mustang.all.map(function (system) {
@@ -393,6 +370,10 @@ export default {
         this.pagination.descending = false
       }
     },
+    validate() {
+      if (this.eDistro.length == 0) return 'Required'
+      return true
+    },
     setTableConfigDefault () {
       console.log('updating default table config settings to\n' + this.showHeaders)
       localStorage.showHeaders = this.showHeaders
@@ -403,22 +384,24 @@ export default {
       this.executingQuery = true
       // gather queried boards for results dropdown
       this.queriedBoards = this.eMustang.concat(this.eMerlin, this.eOsprey)
-      // gather selections
-      console.log(
-        'eMustang = ' + typeof this.eMustang + '\n' +
-        'eMerlin = ' + typeof this.eMerlin + '\n' +
-        'eOsprey = ' + typeof this.eOsprey + '\n' +
-        'eDistro = ' + typeof this.eDistro
-      )
       // make the ajax request
-
-      this.executingQuery = false
-      if (/*query came back okay*/ true) {
+      axios.get(this.host + '/api/query/test_history?boards='
+                 + this.queriedBoards + '&distros=' + this.eDistro)
+      .then((res) => {
+        // handle response data
+        this.queryRes.data = res.data
+        // update UI
+        this.executingQuery = false
         this.queryExpanded = false
         this.resultExpanded = true
-      } else {
+      })
+      .catch((err) => {
+        console.log(err)
         //display error message somewhere
-      }
+
+        // update UI
+        this.executingQuery = false
+      })
     }
   }
 }
