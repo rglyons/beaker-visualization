@@ -161,7 +161,9 @@
     <v-expansion-panel-content v-model="resultExpanded">
       <div slot="header">Results</div>
       <v-card>
-        <div style="width: 90%; margin: auto">
+        <v-card-title class="title">Job Statistics</v-card-title>
+        <!-- <div style="width: 90%; margin: auto"> -->
+        <v-card-title>
           <!-- boards that were queried -->
           <v-select
             id="queriedBoardSelect"
@@ -170,6 +172,7 @@
             label="Select a Board"
             bottom
           ></v-select>
+          <v-spacer></v-spacer>
           <v-btn
             fab dark primary
             v-tooltip:left="{ html: 'Edit Display Filter' }"
@@ -178,7 +181,8 @@
             >
             <v-icon dark>edit</v-icon>
           </v-btn>
-        </div>
+        </v-card-title>
+        <!-- </div> -->
         <v-data-table
           v-bind:headers="queryRes.headers"
           :items="queryRes.data[etableFilter]"
@@ -381,6 +385,8 @@ export default {
       this.cfgSnackbar = true
     },
     execQuery () {
+      // check if an OS has been selected for the search
+      if (this.validate() == 'Required') return
       this.executingQuery = true
       // gather queried boards for results dropdown
       this.queriedBoards = this.eMustang.concat(this.eMerlin, this.eOsprey)
@@ -394,6 +400,8 @@ export default {
         this.executingQuery = false
         this.queryExpanded = false
         this.resultExpanded = true
+        // pre-fill data table
+        this.etableFilter = this.queriedBoards[0]
       })
       .catch((err) => {
         console.log(err)

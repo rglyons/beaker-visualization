@@ -29,7 +29,7 @@
     </v-toolbar>
     <!-- router view -->
     <main>
-      <v-container fluid>
+      <v-container fluid style="margin-top: 0px">
         <transition name="slide-fade" mode="out-in">
           <keep-alive>
             <router-view></router-view>
@@ -105,7 +105,6 @@ export default {
   font-family: 'Avenir', Helvetica, Arial, sans-serif
   text-align: center
   color: #2c3e50
-  margin-top: 5px
 
 .slide-fade-enter
   transform: translateY(1300px)

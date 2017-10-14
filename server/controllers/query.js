@@ -151,29 +151,29 @@ module.exports = {
     }).toString()
     execAsyncQuery(pool,
       "select RR.fqdn, D.name as distro,\
-      	count(case RT.status when 'New' then RT.status else null end) as new, \
-      	count(case RT.status when 'Processed' then RT.status else null end) as processed, \
-      	count(case RT.status when 'Queued' then RT.status else null end) as queued, \
-      	count(case RT.status when 'Scheduled' then RT.status else null end) as scheduled, \
-      	count(case RT.status when 'Waiting' then RT.status else null end) as waiting, \
-      	count(case RT.status when 'Installing' then RT.status else null end) as installing, \
-      	count(case RT.status when 'Running' then RT.status else null end) as running, \
-      	count(case RT.status when 'Reserved' then RT.status else null end) as reserved, \
-      	count(case RT.status when 'Completed' then RT.status else null end) as completed, \
-      	count(case RT.status when 'Cancelled' then RT.status else null end) as cancelled, \
-      	count(case RT.status when 'Aborted' then RT.status else null end) as aborted, \
-      	count(case RT.result when 'New' then RT.result else null end) as new_result,\
-      	count(case RT.result when 'Pass' then RT.result else null end) as pass,\
-      	count(case RT.result when 'Warn' then RT.result else null end) as warn,\
-      	count(case RT.result when 'Fail' then RT.result else null end) as fail,\
-      	count(case RT.result when 'Panic' then RT.result else null end) as panic,\
-      	count(case RT.result when 'None' then RT.result else null end) as none,\
-      	count(case RT.result when 'Skip' then RT.result else null end) as skip\
-      from recipe_task RT \
-      	join recipe R on RT.recipe_id=R.id\
-      	join recipe_resource RR on RR.recipe_id=RT.recipe_id\
-      	join distro_tree DT on R.distro_tree_id=DT.id\
-      	join distro D on DT.distro_id=D.id\
+      	count(case J.status when 'New' then J.status else null end) as new, \
+      	count(case J.status when 'Processed' then J.status else null end) as processed, \
+      	count(case J.status when 'Queued' then J.status else null end) as queued, \
+      	count(case J.status when 'Scheduled' then J.status else null end) as scheduled, \
+      	count(case J.status when 'Waiting' then J.status else null end) as waiting, \
+      	count(case J.status when 'Installing' then J.status else null end) as installing, \
+      	count(case J.status when 'Running' then J.status else null end) as running, \
+      	count(case J.status when 'Reserved' then J.status else null end) as reserved, \
+      	count(case J.status when 'Completed' then J.status else null end) as completed, \
+      	count(case J.status when 'Cancelled' then J.status else null end) as cancelled, \
+      	count(case J.status when 'Aborted' then J.status else null end) as aborted, \
+      	count(case J.result when 'New' then J.result else null end) as new_result,\
+      	count(case J.result when 'Pass' then J.result else null end) as pass,\
+      	count(case J.result when 'Warn' then J.result else null end) as warn,\
+      	count(case J.result when 'Fail' then J.result else null end) as fail,\
+      	count(case J.result when 'Panic' then J.result else null end) as panic,\
+      	count(case J.result when 'None' then J.result else null end) as none,\
+      	count(case J.result when 'Skip' then J.result else null end) as skip\
+      from recipe_resource RR join recipe R on RR.recipe_id=R.id \
+      	join recipe_set RS on R.recipe_set_id=RS.id \
+      	join job J on RS.job_id=J.id \
+      	join distro_tree DT on R.distro_tree_id=DT.id \
+      	join distro D on DT.distro_id=D.id \
       where exists(select RS.id from recipe_set RS where RS.id=R.recipe_set_id \
         and exists(select J.id from job J where RS.job_id=J.id and J.deleted is NULL and J.to_delete is NULL)) \
         and RR.fqdn in (" + boards + ")\
@@ -230,5 +230,62 @@ module.exports = {
       res.status(400).send(error)
     })
   },
+
+  getUtilizationNumbers (req, res) {
+    let pool = initConnectionPool(1)
+    execAsyncQuery(pool,
+      'select LJ.fqdn, S.status as system_status, J.id, J.status as job_status \
+      from job J join \
+        (select S.fqdn, max(J.id) as latest_job_id \
+        from system S join recipe_resource RR on S.fqdn=RR.fqdn \
+        join recipe R on RR.recipe_id=R.id join recipe_set RS on R.recipe_set_id=RS.id \
+        join job J on RS.job_id=J.id where S.status!=\'Removed\' group by S.fqdn) \
+      LJ on LJ.latest_job_id=J.id \
+      join system S on LJ.fqdn=S.fqdn \
+      order by S.fqdn;'
+    )
+    .then(queryData => {
+      teardownConnectionPool(pool)
+      let valid_util = {
+        'New': true, 'Processed': true, 'Queued': true, 'Scheduled': true,
+        'Waiting': true, 'Installing': true, 'Running': true, 'Reserved': true
+      }
+      let util = {
+        mustang: { count: 0, utilized: 0 },
+        merlin: { count: 0, utilized: 0 },
+        osprey: { count: 0, utilized: 0 },
+      }
+
+      console.log(queryData)
+
+      for (let row of queryData) {
+        if (row.fqdn.startsWith('mustang')) {
+          util.mustang.count++
+          if (row.system_status != 'Broken' && valid_util[row.job_status]) {
+            util.mustang.utilized++
+          }
+        } else if (row.fqdn.startsWith('merlin')) {
+          util.merlin.count++
+          if (row.system_status != 'Broken' && valid_util[row.job_status]) {
+            util.merlin.utilized++
+          }
+        } else if (row.fqdn.startsWith('osprey')) {
+          util.osprey.count++
+          if (row.system_status != 'Broken' && valid_util[row.job_status]) {
+            util.osprey.utilized++
+          }
+        }
+      }
+      // allow CORS for speedy development
+      res.set({
+        "Access-Control-Allow-Origin": "http://10.76.144.103:8080"
+      })
+      return res.status(200).send(util)
+    })
+    .catch(error => {
+      console.log(error)
+      res.status(400).send(error)
+    })
+  }
 
 }

@@ -2,8 +2,10 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import '../../node_modules/vuetify/dist/vuetify.min.css'
 import '../static/css/material_icon.css'
+import '../static/css/odometer-theme-default.css'
 import '../static/js/jquery.min.js'
 import '../static/js/ResizeSensor.js'
+import '../static/js/odometer.min.js'
 
 import Vue from 'vue'
 import App from './App'
