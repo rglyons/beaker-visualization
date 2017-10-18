@@ -21,7 +21,7 @@ const router = new Router({
       component: Home
     },
     {
-      path: '/lab_status',
+      path: '/lab_status/:labStatusSelected',
       name: 'Lab Status',
       props: true,
       component: LabStatus

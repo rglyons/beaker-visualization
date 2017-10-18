@@ -17,6 +17,12 @@ Vue.use(Vuetify)
 
 Vue.config.productionTip = false
 
+Vue.filter('capitalize', (value) => {
+  if (!value && value !== 0) return ''
+  value = value.toString()
+  return value.charAt(0).toUpperCase() + value.slice(1)
+})
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

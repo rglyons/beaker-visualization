@@ -84,12 +84,20 @@ module.exports = {
           }),
           broken: queryData[0].filter(function(sys){
             return sys.status == 'Broken'
-          }),
+          }).sort(function (sys1, sys2) {
+            let i = sys1.fqdn.indexOf('rack') + 4
+            let j = sys2.fqdn.indexOf('rack') + 4
+            return parseInt(sys1.fqdn.substr(i,3)) - parseInt(sys2.fqdn.substr(j,3))
+          }), // only sort the data that people are lilely to look at
           manual: queryData[0].filter(function(sys){
             return sys.status == 'Manual'
           }),
           removed: queryData[0].filter(function(sys){
             return sys.status == 'Removed'
+          }).sort(function (sys1, sys2) {
+            let i = sys1.fqdn.indexOf('rack') + 4
+            let j = sys2.fqdn.indexOf('rack') + 4
+            return parseInt(sys1.fqdn.substr(i,3)) - parseInt(sys2.fqdn.substr(j,3))
           }),
         };
         var merlin = {
@@ -99,12 +107,20 @@ module.exports = {
           }),
           broken: queryData[1].filter(function(sys){
             return sys.status == 'Broken'
+          }).sort(function (sys1, sys2) {
+            let i = sys1.fqdn.indexOf('rack') + 4
+            let j = sys2.fqdn.indexOf('rack') + 4
+            return parseInt(sys1.fqdn.substr(i,3)) - parseInt(sys2.fqdn.substr(j,3))
           }),
           manual: queryData[1].filter(function(sys){
             return sys.status == 'Manual'
           }),
           removed: queryData[1].filter(function(sys){
             return sys.status == 'Removed'
+          }).sort(function (sys1, sys2) {
+            let i = sys1.fqdn.indexOf('rack') + 4
+            let j = sys2.fqdn.indexOf('rack') + 4
+            return parseInt(sys1.fqdn.substr(i,3)) - parseInt(sys2.fqdn.substr(j,3))
           }),
         };
         var osprey = {
@@ -114,12 +130,20 @@ module.exports = {
           }),
           broken: queryData[2].filter(function(sys){
             return sys.status == 'Broken'
+          }).sort(function (sys1, sys2) {
+            let i = sys1.fqdn.indexOf('rack') + 4
+            let j = sys2.fqdn.indexOf('rack') + 4
+            return parseInt(sys1.fqdn.substr(i,3)) - parseInt(sys2.fqdn.substr(j,3))
           }),
           manual: queryData[2].filter(function(sys){
             return sys.status == 'Manual'
           }),
           removed: queryData[2].filter(function(sys){
             return sys.status == 'Removed'
+          }).sort(function (sys1, sys2) {
+            let i = sys1.fqdn.indexOf('rack') + 4
+            let j = sys2.fqdn.indexOf('rack') + 4
+            return parseInt(sys1.fqdn.substr(i,3)) - parseInt(sys2.fqdn.substr(j,3))
           }),
         };
         result = {
@@ -232,18 +256,22 @@ module.exports = {
   },
 
   getUtilizationNumbers (req, res) {
-    let pool = initConnectionPool(1)
-    execAsyncQuery(pool,
-      'select LJ.fqdn, S.status as system_status, J.id, J.status as job_status \
-      from job J join \
-        (select S.fqdn, max(J.id) as latest_job_id \
-        from system S join recipe_resource RR on S.fqdn=RR.fqdn \
-        join recipe R on RR.recipe_id=R.id join recipe_set RS on R.recipe_set_id=RS.id \
-        join job J on RS.job_id=J.id where S.status!=\'Removed\' group by S.fqdn) \
-      LJ on LJ.latest_job_id=J.id \
-      join system S on LJ.fqdn=S.fqdn \
-      order by S.fqdn;'
-    )
+    let pool = initConnectionPool(2)
+    var promises = [
+      execAsyncQuery(pool, 'SELECT count(*) as failures FROM job WHERE result=\'Fail\''),
+      execAsyncQuery(pool,
+        'select LJ.fqdn, S.status as system_status, J.id, J.status as job_status \
+        from job J join \
+          (select S.fqdn, max(J.id) as latest_job_id \
+          from system S join recipe_resource RR on S.fqdn=RR.fqdn \
+          join recipe R on RR.recipe_id=R.id join recipe_set RS on R.recipe_set_id=RS.id \
+          join job J on RS.job_id=J.id where S.status!=\'Removed\' group by S.fqdn) \
+        LJ on LJ.latest_job_id=J.id \
+        join system S on LJ.fqdn=S.fqdn \
+        order by S.fqdn;'
+      )
+    ]
+    return Promise.all(promises)
     .then(queryData => {
       teardownConnectionPool(pool)
       let valid_util = {
@@ -254,11 +282,12 @@ module.exports = {
         mustang: { count: 0, utilized: 0 },
         merlin: { count: 0, utilized: 0 },
         osprey: { count: 0, utilized: 0 },
+        failureCount: queryData[0][0].failures
       }
 
       console.log(queryData)
 
-      for (let row of queryData) {
+      for (let row of queryData[1]) {
         if (row.fqdn.startsWith('mustang')) {
           util.mustang.count++
           if (row.system_status != 'Broken' && valid_util[row.job_status]) {

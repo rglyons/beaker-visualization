@@ -150,6 +150,7 @@
         </div>
         <div style="width: 90%; margin: auto">
           <v-btn primary style="float: left; margin-bottom: 15px" @click="execQuery">Search</v-btn>
+          <v-btn flat error @click="clearQueryForm">Clear</v-btn>
           <div id="queryLoadingSpinner" v-if="executingQuery">
             <v-progress-circular
               indeterminate v-bind:size="50" v-bind:width="5" class="red--text">
@@ -377,6 +378,12 @@ export default {
     validate() {
       if (this.eDistro.length == 0) return 'Required'
       return true
+    },
+    clearQueryForm () {
+      this.eMustang = []
+      this.eMerlin = []
+      this.eOsprey = []
+      this.eDistro = []
     },
     setTableConfigDefault () {
       console.log('updating default table config settings to\n' + this.showHeaders)

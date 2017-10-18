@@ -18,6 +18,22 @@
             <v-list-tile-content>
               <v-list-tile-title>{{ item.title }}</v-list-tile-title>
             </v-list-tile-content>
+            <!-- expansion list for lab status -->
+            <v-list-tile-action v-if="item.items">
+              <v-icon>keyboard_arrow_down</v-icon>
+            </v-list-tile-action>
+          </v-list-tile>
+          <!-- expansion list for lab status -->
+          <v-list-tile
+            v-for="subItem in item.items"
+            :key="subItem.title"
+            :to="subItem.path"
+          >
+            <v-list-tile-content>
+              <v-list-tile-title>
+                {{ subItem.title }}
+              </v-list-tile-title>
+            </v-list-tile-content>
           </v-list-tile>
         </v-list-group>
       </v-list>
@@ -44,7 +60,7 @@
 </template>
 
 <script>
-import {mapState} from 'vuex'
+import {mapState,mapMutations} from 'vuex'
 import axios from 'axios'
 import store from './store'
 
@@ -62,7 +78,21 @@ export default {
         {
           title: 'Lab Status',
           icon: 'laptop',
-          path: '/lab_status'
+          path: '',
+          items: [
+            {
+              title: 'Mustang',
+              path: '/lab_status/mustang'
+            },
+            {
+              title: 'Merlin',
+              path: '/lab_status/merlin'
+            },
+            {
+              title: 'Osprey',
+              path: '/lab_status/osprey'
+            },
+          ]
         },
         {
           title: 'Test History',
@@ -75,9 +105,10 @@ export default {
   computed: {
     ...mapState([
       'activePage',
-      'host'
+      'host',
     ]),
   },
+  methods: {},
   created: function() {
     // execute query
     axios.get(this.host + '/api/query/lab_status')

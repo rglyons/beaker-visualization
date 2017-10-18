@@ -110,7 +110,7 @@ export default {
   },
   data () {
     return {
-      failureCount: 111111111,
+      failureCount: 0,
       util: {
         mustang: 0,
         merlin: 0,
@@ -125,22 +125,27 @@ export default {
       'host'
     ])
   },
-  methods: {},
+  methods: {
+    getUtilizationData () {
+      // get utilization statisitcs
+      axios.get(this.host + '/api/query/utilization')
+      .then((res) => {
+        this.failureCount = res.data.failureCount
+        this.util.mustang = Math.round((res.data.mustang.utilized / res.data.mustang.count) * 100)
+        this.util.merlin = Math.round((res.data.merlin.utilized / res.data.merlin.count) * 100)
+        this.util.osprey = Math.round((res.data.osprey.utilized / res.data.osprey.count) * 100)
+      })
+      .catch((err) => {
+        this.message = err
+        console.log(err)
+      })
+    }
+  },
   mounted () {
+    this.getUtilizationData()
     setInterval(() => {
-      this.failureCount++
-    }, 3000)
-    // get utilization statisitcs
-    axios.get(this.host + '/api/query/utilization')
-    .then((res) => {
-      this.util.mustang = Math.round((res.data.mustang.utilized / res.data.mustang.count) * 100)
-      this.util.merlin = Math.round((res.data.merlin.utilized / res.data.merlin.count) * 100)
-      this.util.osprey = Math.round((res.data.osprey.utilized / res.data.osprey.count) * 100)
-    })
-    .catch((err) => {
-      this.message = err
-      console.log(err)
-    })
+      this.getUtilizationData()
+    }, 1800000) // get utilization every 30 min
   }
 }
 </script>

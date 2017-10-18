@@ -16,67 +16,26 @@
   </div>
   <br>
   <!-- board data -->
-  <div style="width: 90%; display: table; margin:auto">
-    <div style="display: table-row">
-      <!-- mustang board data -->
-      <div class="detail-list">
-        <h3>Mustang - {{ numMustang }} systems</h3>
-        <v-expansion-panel>
-          <v-expansion-panel-content v-for="(item,i) in labData.mustang" :key="i">
-            <template v-if="i != 'all' && i != 'removed'">
-              <div slot="header">{{i[0].toUpperCase() + i.slice(1)}} - {{ item.length }}</div>
-              <v-card>
-                <ul id="mustang-list" class="grey lighten-3">
-                  <li v-for="board in item">
-                    {{ board.fqdn }}
-                  </li>
-                </ul>
-              </v-card>
-            </template>
-          </v-expansion-panel-content>
-        </v-expansion-panel>
-      </div>
-      <!-- merlin board data -->
-      <br>
-      <div class="detail-list">
-        <h3>Merlin - {{ numMerlin }} systems</h3>
-        <v-expansion-panel>
-          <v-expansion-panel-content v-for="(item,i) in labData.merlin" :key="i">
-            <template v-if="i != 'all' && i != 'removed'">
-              <div slot="header">{{i[0].toUpperCase() + i.slice(1)}} - {{ item.length }}</div>
-              <v-card>
-                <ul id="merlin-list" class="grey lighten-3">
-                  <li v-for="board in item">
-                    {{ board.fqdn }}
-                  </li>
-                </ul>
-              </v-card>
-            </template>
-          </v-expansion-panel-content>
-        </v-expansion-panel>
-      </div>
-      <!-- osprey board data -->
-      <br>
-      <div class="detail-list">
-        <h3>Osprey - {{ numOsprey }} systems</h3>
-        <v-expansion-panel>
-          <v-expansion-panel-content v-for="(item,i) in labData.osprey" :key="i">
-            <template v-if="i != 'all' && i != 'removed'">
-              <div slot="header">{{i[0].toUpperCase() + i.slice(1)}} - {{ item.length }}</div>
-              <v-card>
-                <ul id="osprey-list" class="grey lighten-3">
-                  <li v-for="board in item">
-                    {{ board.fqdn }}
-                  </li>
-                </ul>
-              </v-card>
-            </template>
-          </v-expansion-panel-content>
-        </v-expansion-panel>
-      </div>
-    </div>
+  <div style="width: 60%; margin: auto; margin-top: 70px">
+    <h3>{{ $route.params.labStatusSelected | capitalize }} - {{ numSystems }} systems</h3>
+    <v-expansion-panel>
+      <v-expansion-panel-content
+        v-for="(item,i) in labData[$route.params.labStatusSelected]"
+        :key="i"
+      >
+        <template v-if="i != 'all' && i != 'removed'">
+          <div slot="header">{{ i | capitalize }} - {{ item.length }}</div>
+          <v-card>
+            <ul class="grey lighten-3">
+              <li v-for="board in item">
+                {{ board.fqdn }}
+              </li>
+            </ul>
+          </v-card>
+        </template>
+      </v-expansion-panel-content>
+    </v-expansion-panel>
   </div>
-
 </div>
 </template>
 
@@ -101,12 +60,12 @@ export default {
             },
             scaleLabel: {
               display: true,
-              labelString: 'System Type',
+              labelString: 'System Status',
               fontSize: 18,
               fontStyle: 'bold'
             },
             categoryPercentage: 0.75,
-            barPercentage: 0.65
+            barPercentage: 0.35
           }],
           yAxes: [{
             gridLines: {
@@ -119,9 +78,9 @@ export default {
               fontStyle: 'bold',
               padding: 30
             },
-            ticks: {
-              stepSize: 25
-            }
+            // ticks: {
+            //   stepSize: 25
+            // }
           }]
         }
       }
@@ -130,68 +89,51 @@ export default {
   computed: {
     ...mapState([
       'querying_labStatus',
-      'labData'
+      'labData',
     ]),
-    numMustang: function() {
-      return this.labData.mustang.all.length - this.labData.mustang.removed.length
-    },
-    numMerlin: function() {
-      return this.labData.merlin.all.length - this.labData.merlin.removed.length
-    },
-    numOsprey: function() {
-      return this.labData.osprey.all.length - this.labData.osprey.removed.length
+    numSystems: function() {
+      if (this.$route.params.labStatusSelected) {
+        return (this.labData[this.$route.params.labStatusSelected].all.length
+          - this.labData[this.$route.params.labStatusSelected].removed.length)
+      } else {
+        return 0
+      }
     },
     // datasets for barChart 1
     barChart1_data: function() {
       return {
-        labels: ['Mustang', 'Merlin', 'Osprey'],
+        labels: ['Automated', 'Broken', 'Manual'],
         datasets: [
           {
-            label: 'Automated',
+            label: this.$route.params.labStatusSelected,
             borderColor: '#26A65B',
             borderWidth: '1',
             backgroundColor: 'rgba(38, 166, 91, 0.35)',
-            data: [
-              this.labData.mustang.automated.length,
-              this.labData.merlin.automated.length,
-              this.labData.osprey.automated.length
-              // 220, 8, 50
-            ]
-          },
-          {
-            label: 'Broken',
-            borderColor: '#F62459',
-            borderWidth: '1',
-            backgroundColor: 'rgba(246, 30, 150, 0.35)',
-            data: [
-              this.labData.mustang.broken.length,
-              this.labData.merlin.broken.length,
-              this.labData.osprey.broken.length
-              // 75, 8, 23
-            ]
-          },
-          {
-            label: 'Manual',
-            borderColor: '#FFA400',
-            borderWidth: '1',
-            backgroundColor: 'rgba(255, 100, 0, 0.35)',
-            data: [
-              this.labData.mustang.manual.length,
-              this.labData.merlin.manual.length,
-              this.labData.osprey.manual.length
-              // 8, 7, 3
-            ]
-          },
+            data: (this.$route.params.labStatusSelected) ? [
+              this.labData[this.$route.params.labStatusSelected].automated.length,
+              this.labData[this.$route.params.labStatusSelected].broken.length,
+              this.labData[this.$route.params.labStatusSelected].manual.length
+            ] : [0, 0, 0]
+          }
         ]
       }
     }
   },
+  watch: {
+
+  },
+  methods: {
+    sortBoards (list) {
+      return list.sort((sys1, sys2) => {
+        let i = sys1.fqdn.indexOf('rack') + 4
+        let j = sys2.fqdn.indexOf('rack') + 4
+        return parseInt(sys1.fqdn.substr(i,3)) - parseInt(sys2.fqdn.substr(j,3))
+      })
+    }
+  },
   mounted: function() {
     // add listener to resize chart when parent div resizes
-    new ResizeSensor(this.$refs.barChart1, function() {
-      //console.log('resizing chart container')
-      //$scope.$emit('$resize')
-    })
+    new ResizeSensor(this.$refs.barChart1, function() { })
   }
 }
 </script>
