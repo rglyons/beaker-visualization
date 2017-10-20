@@ -7,7 +7,7 @@
     v-if="querying_labStatus">
   </v-progress-linear>
   <!-- add in a graph component -->
-  <div id="barChart1" ref="barChart1">
+  <div id="barChart1" ref="barChart1" :key="barChart1_data.datasets[0].label">
     <bar-chart
       :chart-data="barChart1_data"
       :options="barChart1_options"
@@ -50,6 +50,8 @@ export default {
   },
   data: function () {
     return {
+      sensor: null,
+      destroying: false,
       barChart1_options: {
         responsive: true,
         maintainAspectRatio: false,
@@ -123,17 +125,39 @@ export default {
 
   },
   methods: {
-    sortBoards (list) {
-      return list.sort((sys1, sys2) => {
-        let i = sys1.fqdn.indexOf('rack') + 4
-        let j = sys2.fqdn.indexOf('rack') + 4
-        return parseInt(sys1.fqdn.substr(i,3)) - parseInt(sys2.fqdn.substr(j,3))
-      })
-    }
+
   },
   mounted: function() {
     // add listener to resize chart when parent div resizes
-    new ResizeSensor(this.$refs.barChart1, function() { })
+    this.sensor = new ResizeSensor(this.$refs.barChart1, function() { })
+  },
+  updated: function() {
+    /* replace resize sensor when changing graph
+    * since graph parent div loses sensor when
+    * changing graph data (on route navigation)
+    */
+    this.$nextTick(function() {
+      /* this function executes after every UI update after
+      * DOM elements are finished rendering -
+      *
+      * add listener to resize chart when parent div resizes
+      * use a bool to indicate when a new resize sensor should and
+      * should not be created. If we're destroying the component,
+      * a new resize sensor should not be created (bc the HTML element
+      * isn't there anymore and it throws errors)
+      */
+      if (!this.destroying) {
+        this.sensor = new ResizeSensor(this.$refs.barChart1, function() { })
+      }
+    })
+  },
+  beforeDestroy: function() {
+    /* remove resize sensor so it's not trying
+    * to execute on something that no longer exists
+    * (after router leaves this component)
+    */
+    ResizeSensor.detach(this.$refs.barChart1);
+    this.destroying = true
   }
 }
 </script>

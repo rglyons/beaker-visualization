@@ -47,7 +47,8 @@
     <main>
       <v-container fluid style="margin-top: 0px">
         <transition name="slide-fade" mode="out-in">
-          <keep-alive>
+          <!-- exclude lab status to prevent canvas disappearing problem -->
+          <keep-alive exclude="LabStatus">  
             <router-view></router-view>
           </keep-alive>
         </transition>
@@ -60,7 +61,7 @@
 </template>
 
 <script>
-import {mapState,mapMutations} from 'vuex'
+import {mapState} from 'vuex'
 import axios from 'axios'
 import store from './store'
 
